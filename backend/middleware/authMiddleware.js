@@ -1,5 +1,6 @@
-import User from "../models/userModel";
-import { errorResponse } from "../utils/apiResponse";
+import User from "../models/userModel.js";
+import { errorResponse } from "../utils/apiResponse.js";
+import jwt from 'jsonwebtoken'
 
 export const protect = async (req, res, next) => {
     try {
@@ -12,29 +13,31 @@ export const protect = async (req, res, next) => {
         }
 
         if (!token) {
-            errorResponse(res, 401, "Not Authorized, token missing");
+            return errorResponse(res, 401, "Not Authorized, token missing");
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = await User.findbyId(decoded.id).select("-password");
+        req.user = await User.findById(decoded.id).select("-password");
 
         if (!req.user) {
             return errorResponse(res, 401, "User not found");
         }
 
         if (!req.user.isActive) {
-            errorResponse(res, 401, "Account is deactivated");
+            return errorResponse(res, 401, "Account is deactivated");
         }
 
-    }catch(error){
-       return errorResponse(res, 401, "Not authorized, invalid token");
+        next();
+
+    } catch (error) {
+        return errorResponse(res, 401, "Not authorized, invalid token");
     }
 };
 
 export const authorize = (...roles) => {
     return (req, res, next) => {
-        if (!roles.includes(req.user.role)){
-            errorResponse(res, 403, `Role ${req.user.role} is not allowed to access this route`)
+        if (!roles.includes(req.user.role)) {
+           return errorResponse(res, 403, `Role ${req.user.role} is not allowed to access this route`)
         };
         next();
     };

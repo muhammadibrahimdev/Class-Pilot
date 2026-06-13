@@ -178,3 +178,5 @@ step-9 Created validate function in middleware/validate.js
 step-10 Created authController in controllers/authController.js
 
 step-11 Created authRoutes in routes/authRoutes.js
+
+step-12 Check auth apis register, login, logout, me, refershtoken
