@@ -1,0 +1,178 @@
+step-1: Backend setup:
+
+mkdir classpilot && cd classpilot
+mkdir backend && cd backend
+npm init -y
+npm install express mongoose dotenv bcryptjs jsonwebtoken cookie-parser cors helmet express-validator nodemailer cloudinary multer socket.io stripe pdfkit
+npm install -D nodemon
+
+step-2:  Frontend setup:
+cd ..
+npx create-react-app frontend
+cd frontend
+npm install axios react-router-dom @reduxjs/toolkit react-redux react-toastify socket.io-client
+
+step-3: Backend & Frontend folder structure:
+classpilot/
+│
+├── backend/
+│   ├── config/
+│   │   ├── db.js
+│   │   └── cloudinary.js
+│   │
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── schoolController.js
+│   │   ├── userController.js
+│   │   ├── studentController.js
+│   │   ├── attendanceController.js
+│   │   ├── feesController.js
+│   │   ├── resultController.js
+│   │   └── notificationController.js
+│   │
+│   ├── middleware/
+│   │   ├── authMiddleware.js
+│   │   └── errorMiddleware.js
+│   │
+│   ├── models/
+│   │   ├── userModel.js
+│   │   ├── schoolModel.js
+│   │   ├── classModel.js
+│   │   ├── studentModel.js
+│   │   ├── attendanceModel.js
+│   │   ├── feesModel.js
+│   │   ├── resultModel.js
+│   │   └── notificationModel.js
+│   │
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   ├── schoolRoutes.js
+│   │   ├── userRoutes.js
+│   │   ├── studentRoutes.js
+│   │   ├── attendanceRoutes.js
+│   │   ├── feesRoutes.js
+│   │   ├── resultRoutes.js
+│   │   └── notificationRoutes.js
+│   │
+│   ├── services/
+│   │   ├── emailService.js
+│   │   └── pdfService.js
+│   │
+│   ├── socket/
+│   │   └── socketHandler.js
+│   │
+│   ├── utils/
+│   │   ├── generateToken.js
+│   │   └── apiResponse.js
+│   │
+│   ├── .env
+│   ├── .gitignore
+│   └── server.js
+│
+├── frontend/
+│   ├── public/
+│   │
+│   └── src/
+│       ├── components/
+│       │   ├── common/
+│       │   │   ├── Navbar.jsx
+│       │   │   ├── Sidebar.jsx
+│       │   │   ├── Loader.jsx
+│       │   │   └── ProtectedRoute.jsx
+│       │   │
+│       │   ├── auth/
+│       │   │   ├── LoginForm.jsx
+│       │   │   └── RegisterForm.jsx
+│       │   │
+│       │   ├── dashboard/
+│       │   │   ├── StatsCard.jsx
+│       │   │   └── RecentActivity.jsx
+│       │   │
+│       │   ├── students/
+│       │   │   ├── StudentCard.jsx
+│       │   │   └── StudentForm.jsx
+│       │   │
+│       │   ├── attendance/
+│       │   │   └── AttendanceTable.jsx
+│       │   │
+│       │   ├── fees/
+│       │   │   └── FeesTable.jsx
+│       │   │
+│       │   └── notifications/
+│       │       └── NotificationBell.jsx
+│       │
+│       ├── pages/
+│       │   ├── auth/
+│       │   │   ├── Login.jsx
+│       │   │   └── Register.jsx
+│       │   │
+│       │   ├── superadmin/
+│       │   │   ├── Dashboard.jsx
+│       │   │   └── Schools.jsx
+│       │   │
+│       │   ├── schooladmin/
+│       │   │   ├── Dashboard.jsx
+│       │   │   ├── Teachers.jsx
+│       │   │   ├── Students.jsx
+│       │   │   ├── Classes.jsx
+│       │   │   └── Fees.jsx
+│       │   │
+│       │   ├── teacher/
+│       │   │   ├── Dashboard.jsx
+│       │   │   ├── Attendance.jsx
+│       │   │   └── Results.jsx
+│       │   │
+│       │   └── parent/
+│       │       ├── Dashboard.jsx
+│       │       └── ChildProgress.jsx
+│       │
+│       ├── store/
+│       │   ├── index.js
+│       │   └── slices/
+│       │       ├── authSlice.js
+│       │       ├── schoolSlice.js
+│       │       ├── studentSlice.js
+│       │       └── notificationSlice.js
+│       │
+│       ├── hooks/
+│       │   ├── useAuth.js
+│       │   └── useSocket.js
+│       │
+│       ├── utils/
+│       │   ├── axiosInstance.js
+│       │   └── helpers.js
+│       │
+│       ├── styles/
+│       │   └── global.css
+│       │
+│       ├── App.jsx
+│       └── index.js
+│
+├── .gitignore
+└── README.md
+
+
+step-4: Create .env in backend
+PORT=5000
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+CLOUDINARY_NAME=your_cloudinary_name
+CLOUDINARY_API_KEY=your_key
+CLOUDINARY_API_SECRET=your_secret
+EMAIL_USER=your_email
+EMAIL_PASS=your_email_password
+STRIPE_SECRET_KEY=your_stripe_key
+CLIENT_URL=http://localhost:3000
+
+step-5: Created models of user and school
+
+step-6: Created generate access/refresh token function in utils/generateToken.js
+
+step-7: created protect & role middleware in middleware/authMiddleware.js
+
+step-6 Created Register & login APIs
+
+step-7: JWT access token aur refresh token
+
+step:-8: Role-based middlewares
