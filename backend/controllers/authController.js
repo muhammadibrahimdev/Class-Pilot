@@ -1,3 +1,4 @@
+import { School } from "../models/schoolModel.js";
 import User from "../models/userModel.js"
 import { errorResponse, successResponse } from "../utils/apiResponse.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
@@ -6,7 +7,7 @@ import jwt from 'jsonwebtoken'
 
 export const register = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, schoolName, schoolEmail, schoolPhone} = req.body;
 
         const userExist = await User.findOne({ email });
 
@@ -14,7 +15,30 @@ export const register = async (req, res) => {
             return errorResponse(res, 400, "Email already registered");
         }
 
+        if (role === "schooladmin") {
+            if (!schoolName || !schoolEmail || !schoolPhone) {
+                return errorResponse(res, 400, "School name, email, and phone are required");
+            }
+
+            const schoolExist = await School.findOne({ email: schoolEmail });
+            if (schoolExist) {
+                return errorResponse(res, 400, "A school with this email already exists");
+            }
+        }
+
         const user = await User.create({ name, email, password, role });
+
+        if (role === "schooladmin") {
+            const school = await School.create({
+                name: schoolName,
+                email: schoolEmail,
+                phone: schoolPhone,
+                adminId: user._id,
+            });
+
+            user.schoolId = school._id;
+            await user.save({ validateBeforeSave: false });
+        }
 
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefreshToken(user._id);
@@ -28,6 +52,7 @@ export const register = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                schoolId: user.schoolId,
             },
             accessToken,
             refreshToken,

@@ -180,3 +180,19 @@ step-10 Created authController in controllers/authController.js
 step-11 Created authRoutes in routes/authRoutes.js
 
 step-12 Check auth apis register, login, logout, me, refershtoken
+
+step-13 Run these commands - npm install @reduxjs/toolkit react-redux react-router-dom axios
+
+step-14 Make axios.js for: Before every request, attach token
+
+step-14 Setup Redux toolkit for login/register/logut/getme in store/slices/authslice.js
+
+step-15 carete Login and Register UI page
+
+Phase 1 completed
+
+Phase 2 Start
+
+step-16 Building SchoolController and route
+
+step-17 

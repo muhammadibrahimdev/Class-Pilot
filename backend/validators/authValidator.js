@@ -17,6 +17,19 @@ export const registerValidator = [
     .optional()
     .isIn(["schooladmin", "teacher", "parent", "student"])
     .withMessage("Invalid role"),
+
+    body("schoolName")
+        .if(body("role").equals("schooladmin"))
+        .notEmpty().withMessage("School name is required"),
+
+    body("schoolEmail")
+        .if(body("role").equals("schooladmin"))
+        .notEmpty().withMessage("School email is required")
+        .isEmail().withMessage("Please enter a valid school email"),
+
+    body("schoolPhone")
+        .if(body("role").equals("schooladmin"))
+        .notEmpty().withMessage("School phone is required"),
 ];
 
 export const loginValidator = [

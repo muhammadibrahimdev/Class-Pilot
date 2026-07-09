@@ -7,6 +7,12 @@ const userSchema = new mongoose.Schema(
             required: [true, "Name is required"],
             trim: true,
         },
+        phone: {
+            type: String,
+            // unique: true,
+            required: [true, "Phone number is required"],
+            trim: true,
+        },
         email: {
             type: String,
             required: [true, "Email is required"],
@@ -24,6 +30,14 @@ const userSchema = new mongoose.Schema(
             type: String,
             enum: ["superadmin", "schooladmin", "teacher", "student", "parent"],
             default: "parent",
+        },
+        subject: {
+            type: String,
+            default: null,
+        },
+        assignedClass: {
+            type: String,
+            default: null,
         },
         schoolId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -50,9 +64,9 @@ const userSchema = new mongoose.Schema(
         passwordRefreshToken: {
             type: String,
             default: null,
-            select: false, 
+            select: false,
         },
-        passwordResetExpires:{
+        passwordResetExpires: {
             type: Date,
             default: null,
             select: false
@@ -68,9 +82,10 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function () {
-    if(!this.isModified("password")) return;
+    if (!this.isModified("password")) return;
+
     this.password = await bcrypt.hash(this.password, 12);
-    
+
 })
 
 userSchema.methods.comparePassword = async function (enteredPassword) {

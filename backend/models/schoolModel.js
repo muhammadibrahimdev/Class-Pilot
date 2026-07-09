@@ -1,4 +1,6 @@
-const schoolModel = new mongoose.Schema(
+import mongoose from 'mongoose';
+
+const schoolSchema = new mongoose.Schema(
     {
         name: {
             type: String,
@@ -35,7 +37,7 @@ const schoolModel = new mongoose.Schema(
         plan: {
             type: String,
             enum: ["basic", "pro"],
-            default: basic,
+            default: "basic",
         },
         planExpiresAt: {
             type: Date,
@@ -73,11 +75,11 @@ const schoolModel = new mongoose.Schema(
     }
 );
 
-schoolSchema.pre("save", async function (next) {
+schoolSchema.pre("save", function () {
     if (this.isModified("plan")) {
         this.studentLimit = this.plan === "pro" ? 999999 : 200;
     };
-    next();
+
 });
 
 export const School = mongoose.model("School", schoolSchema);
