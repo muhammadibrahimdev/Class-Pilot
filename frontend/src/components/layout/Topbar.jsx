@@ -10,13 +10,13 @@ export default function Topbar() {
       
       {/* Search */}
       <div className="relative w-full max-w-sm">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+        {/* <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
         <input
           type="text"
           placeholder="Search students, classes..."
           className="w-full pl-9 pr-4 py-2 bg-surface border border-border rounded-lg
             text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-        />
+        /> */}
       </div>
 
       {/* Right side */}

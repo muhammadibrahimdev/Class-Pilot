@@ -51,10 +51,11 @@ export const getAllTeachers = async (req, res) => {
             schoolId: req.user.schoolId,
             role: 'teacher',
             ...(search && {
-                $or: [
+                $or: [  
                     { name: { $regex: search, $options: 'i' } },
                     { email: { $regex: search, $options: 'i' } },
                     { subject: { $regex: search, $options: 'i' } },
+                    { assignedClass: { $regex: search, $options: 'i' } },
                 ],
             }),
         };

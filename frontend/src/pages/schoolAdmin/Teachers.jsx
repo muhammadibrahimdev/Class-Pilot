@@ -24,6 +24,7 @@
     export default function Teachers() {
         const [searchInput, setSearchInput] = useState('');
         const search = useDebounce(searchInput, 400);
+        // const search = searchInput;
         const [page, setPage] = useState(1);
         const [sortKey, setSortKey] = useState('name');
         const [sortDir, setSortDir] = useState('asc');
@@ -95,7 +96,7 @@
                     sortKey={sortKey}
                     sortDir={sortDir}
                     onSortChange={(key, dir) => { setSortKey(key); setSortDir(dir); setPage(1); }}
-                    search={search}
+                    search={searchInput}
                     onSearchChange={(val) => { setSearchInput(val); setPage(1); }}
                     searchPlaceholder="Search by name, email, subject..."
                     loading={loading}
