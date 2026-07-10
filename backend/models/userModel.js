@@ -26,32 +26,32 @@ const userSchema = new mongoose.Schema(
             minlength: [6, "Password must be at least 6 characters"],
             select: false,
         },
+        schoolId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'School',
+            required: true,
+        },
         role: {
             type: String,
             enum: ["superadmin", "schooladmin", "teacher", "student", "parent"],
             default: "parent",
         },
-        subject: {
-            type: String,
-            default: null,
-        },
-        assignedClass: {
-            type: String,
-            default: null,
-        },
-        schoolId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "School",
-            default: null,
-        },
-        photo: {
-            type: String,
-            default: null,
-        },
-        isActive: {
-            type: Boolean,
-            default: true,
-        },
+        // subject: {
+        //     type: String,
+        //     default: null,
+        // },
+        // assignedClass: {
+        //     type: String,
+        //     default: null,
+        // },
+        // photo: {
+        //     type: String,
+        //     default: null,
+        // },
+        // isActive: {
+        //     type: Boolean,
+        //     default: true,
+        // },
         isEmailVerified: {
             type: Boolean,
             default: false,
