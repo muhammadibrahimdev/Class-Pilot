@@ -19,7 +19,7 @@ export const addTeacher = async (req, res) => {
             email,
             phone,
             password,
-            assignedClass ,  // ADD
+            assignedClass,  // ADD
             subject,
             role: "teacher",
             schoolId: req.user.schoolId,
@@ -39,6 +39,7 @@ export const addTeacher = async (req, res) => {
             }
         })
     } catch (error) {
+        console.log("error from usercontroller.js - addTeacher", error.message);
         return errorResponse(res, 500, error.message);
     }
 }
@@ -51,7 +52,7 @@ export const getAllTeachers = async (req, res) => {
             schoolId: req.user.schoolId,
             role: 'teacher',
             ...(search && {
-                $or: [  
+                $or: [
                     { name: { $regex: search, $options: 'i' } },
                     { email: { $regex: search, $options: 'i' } },
                     { subject: { $regex: search, $options: 'i' } },
@@ -81,7 +82,49 @@ export const getAllTeachers = async (req, res) => {
             }
         );
     } catch (error) {
+        console.log("error from usercontroller.js - getAllTeachers", error.message);
         return errorResponse(res, 500, error.message);
     }
 
+}
+
+export const editTeacher = async (req, res) => {
+    try {
+        
+        const { name, email, phone, password, subject, assignedClass } = req.body;
+
+        const teacher = await User.findById(req.params.id);
+
+        if (!teacher) {
+            return errorResponse(res, 404, "Teacher not found");
+        }
+
+        teacher.name = name;
+        teacher.email = email;
+        teacher.phone = phone;
+        teacher.subject = subject;
+        teacher.assignedClass = assignedClass;
+
+        if (password) {
+            teacher.password = password; 
+        }
+
+        await teacher.save();
+
+        return successResponse(res, 200, "Teacher updated successfully", teacher);
+
+    } catch (error) {
+        console.log("error from userController.js - editTeacher", error.message);
+        return errorResponse(res, 500, error.message);
+    }
+}
+
+export const deleteTeacher = async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        successResponse(res, 200, "Teacher is deleted");
+    } catch (error) {
+        console.log("error from usercontroller.js - deleteTeacher", error.message);
+        return errorResponse(res, 500, error.message);
+    }
 }

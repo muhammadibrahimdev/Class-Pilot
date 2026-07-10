@@ -3,17 +3,19 @@ import Input from '../ui/Input';
 import Button from '../ui/Button';
 import { Icons } from '../../config/icon';
 import API from '../../api/axios';
+import { ShieldQuestion } from 'lucide-react';
+import { toast } from 'sonner';
 
 const DUMMY_CLASSES = ['Grade 9-A', 'Grade 9-B', 'Grade 10-A', 'Grade 10-B', 'Grade 11-A'];
 
-export default function AddTeacherForm({ onClose, refetch }) {
+export default function AddTeacherForm({ onClose, refetch, selectedTeacher }) {
   const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    assignedClass: '',
-    subject: 'abc',
+    name: selectedTeacher?.name || '',
+    email: selectedTeacher?.email || '',
+    phone: selectedTeacher?.phone || '',
+    password: selectedTeacher?.password || '',
+    assignedClass: selectedTeacher?.assignedClass || '',
+    subject: selectedTeacher?.subject || '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -22,13 +24,24 @@ export default function AddTeacherForm({ onClose, refetch }) {
   const handleSubmit = async (e) => {
     setLoading(true);
     e.preventDefault();
+
     try {
-      await API.post('/users/teacher', form);
+      let response;
+      if (selectedTeacher) {
+        response = await API.put(`/users/teacher/${selectedTeacher._id}`, form);
+      } else {
+        response =  await API.post('/users/teacher', form);
+      }
+      toast.success(response.data.message);
       refetch();
       onClose();
       setLoading(false);
+
     } catch (error) {
-      console.log("eror=> ", error.message);
+      toast.error(
+        error.response?.data?.message || "Something went wrong"
+      );
+      return console.log("eror=> ", error.message);
     }
     onClose();
   };

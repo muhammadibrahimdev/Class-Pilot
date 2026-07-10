@@ -18,7 +18,7 @@ export const useTeachers = ({ page, limit, sortKey, sortDir, search }) => {
 
         API.get('/users/teachers', { params, signal: controller.signal })
             .then((response) => {
-                // console.log('API response:', response.data);
+                console.log('API response:', response.data);
                 setData(response.data.data.teachers ?? []);
                 setTotal(response.data.data.total);
                 setTotalPages(response.data.data.totalPages);
