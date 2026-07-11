@@ -36,22 +36,22 @@ const userSchema = new mongoose.Schema(
             enum: ["superadmin", "schooladmin", "teacher", "student", "parent"],
             default: "parent",
         },
-        // subject: {
+        // subjects: {
         //     type: String,
         //     default: null,
         // },
-        // assignedClass: {
-        //     type: String,
-        //     default: null,
-        // },
+        assignedClass: {
+            type: mongoose.Schema.Types.ObjectId,
+            default: null,
+        },
         // photo: {
         //     type: String,
         //     default: null,
         // },
-        // isActive: {
-        //     type: Boolean,
-        //     default: true,
-        // },
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
         isEmailVerified: {
             type: Boolean,
             default: false,

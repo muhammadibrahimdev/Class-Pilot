@@ -2,11 +2,17 @@ import User from "../models/userModel.js";
 import { errorResponse, successResponse } from "../utils/apiResponse.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 
+const ALLOWED_SORT_KEYS = ['name', 'email', 'class', 'subject', 'createdAt']
+
 export const addTeacher = async (req, res) => {
     try {
+        if (!req.user.schoolId) {
+            return errorResponse(res, 403, "No school associated with your account");
+        }
+
         const { name, email, phone, password, role, assignedClass, subject, } = req.body;
-        const teacherExist = await User.findOne({ email: email });
-        const phoneExist = await User.findOne({ phone: phone });
+        const teacherExist = await User.findOne({ email: email, schoolId: req.user.schoolId, role: "teacher" });
+        const phoneExist = await User.findOne({ phone: phone, schoolId: req.user.schoolId, role: "teacher" });
 
         if (teacherExist) {
             return errorResponse(res, 400, "Teacher with this email is already registered");
@@ -46,7 +52,17 @@ export const addTeacher = async (req, res) => {
 
 export const getAllTeachers = async (req, res) => {
     try {
-        const { page = 1, limit = 10, sortKey = 'name', sortDir = 'asc', search = '' } = req.query;
+
+        if (!req.user.schoolId) {
+            return errorResponse(res, 403, "No school associated with your account");
+        }
+
+        const page = Math.max(1, Number(req.query.page) || 1);
+        const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
+        const search = req.query.search || "";
+
+        const sortKey = ALLOWED_SORT_KEYS.includes(req.query.sortKey) ? req.query.sortKey : 'name';
+        const sortDir = req.query.sortDir === "asc" ? 1 : -1;
 
         const query = {
             schoolId: req.user.schoolId,
@@ -63,9 +79,10 @@ export const getAllTeachers = async (req, res) => {
 
         const [teachers, total] = await Promise.all([
             User.find(query)
-                .sort({ [sortKey]: sortDir === 'asc' ? 1 : -1 })
+                .populate("assignedClasses", "name grade section")
+                .sort({ [sortKey]: sortDir })
                 .skip((page - 1) * limit)
-                .limit(Number(limit)),
+                .limit(limit),
             User.countDocuments(query),
         ]);
 
@@ -76,8 +93,8 @@ export const getAllTeachers = async (req, res) => {
             {
                 teachers,
                 total,
-                page: Number(page),
-                limit: Number(limit),
+                page,
+                limit,
                 totalPages: Math.ceil(total / limit),
             }
         );
@@ -90,24 +107,22 @@ export const getAllTeachers = async (req, res) => {
 
 export const editTeacher = async (req, res) => {
     try {
-        
+
         const { name, email, phone, password, subject, assignedClass } = req.body;
 
-        const teacher = await User.findById(req.params.id);
+        const teacher = await User.findOne({
+            _id: req.params.id,
+            schoolId: req.user.schoolId,
+            role: "teacher",
+        });
+        if (!teacher) return errorResponse(res, 404, "Teacher not found");
 
-        if (!teacher) {
-            return errorResponse(res, 404, "Teacher not found");
-        }
-
-        teacher.name = name;
-        teacher.email = email;
-        teacher.phone = phone;
-        teacher.subject = subject;
-        teacher.assignedClass = assignedClass;
-
-        if (password) {
-            teacher.password = password; 
-        }
+        if (name) teacher.name = name;
+        if (email) teacher.email = email;
+        if (phone) teacher.phone = phone;
+        if (subject) teacher.subject = subject;
+        if (assignedClass) teacher.assignedClass = assignedClass;
+        if (password) teacher.password = password;
 
         await teacher.save();
 
@@ -121,8 +136,12 @@ export const editTeacher = async (req, res) => {
 
 export const deleteTeacher = async (req, res) => {
     try {
+        const teacher = await User.findById(req.params.id);
+        if (!teacher) return errorResponse(res, 404, "Teacher not found");
+        if (teacher.role !== "teacher") return errorResponse(res, 400, "User is not a teacher");
+
         await User.findByIdAndDelete(req.params.id);
-        successResponse(res, 200, "Teacher is deleted");
+        return successResponse(res, 200, "Teacher is deleted");
     } catch (error) {
         console.log("error from usercontroller.js - deleteTeacher", error.message);
         return errorResponse(res, 500, error.message);
