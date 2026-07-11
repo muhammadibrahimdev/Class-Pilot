@@ -117,26 +117,117 @@ export const updateClass = async (req, res) => {
         }
 
         const { className, grade, section } = req.body;
-        const classExists = await Class.findOne({
-            grade,
-            section,
-            _id: { $ne: req.params.id },
-            schoolId: req.user.schoolId,
+
+        const classToUpdate = await Class.findOne({
+            _id: req.params.id,
+            schoolId: req.user.schoolid,
         })
-        if (!classExists) return errorResponse(res, 404, "Class not found");
+
+        if (!classToUpdate) return errorResponse(res, 404, "Class not found");
+
+        if (grade && section) {
+            const dublicate = await Class.findOne({
+                grade,
+                section,
+                schoolId: req.user.schoolId,
+                _id: { $ne: req.params.id },
+            })
+            if (dublicate) return errorResponse(res, 400, "Class with this grade and section already exist");
+        }
 
         const filter = {
             _id: req.params.id,
             schoolId: req.user.schoolId,
         }
+
         const updatedData = {
-            className, grade, section,
-        }
-        const updatedClass = await Class.findOneAndUpdate(filter, updatedData, {new: true});
+            ...(className && { className }),
+            ...(grade && { grade }),
+            ...(section && { section }),
+        };
+
+        const updatedClass = await Class.findOneAndUpdate(filter, updatedData, { new: true });
 
         return successResponse(res, 200, "Class updated", updatedClass);
     } catch (error) {
         console.log("error from classController.js - updateClass ", error.message);
+        return errorResponse(res, 500, error.message);
+    }
+}
+
+export const addSubjectToClass = async (req, res) => {
+    try {
+
+        if (!req.user.schoolId) {
+            return errorResponse(res, 403, "No school associated with your account");
+        }
+
+        const { subjectName, teacherId } = req.body;
+
+        const classToUpdate = await Class.findOne({
+            _id: req.params.id,
+            schoolId: req.user.schoolId,
+        });
+        if (!classToUpdate) return errorResponse(res, 404, "Class not found");
+
+        const subjectExists = classToUpdate.subjects.some(
+            (s) => s.name.toLowerCase() === subjectName.toLowerCase()
+        );
+        if (subjectExists) return errorResponse(res, 400, "Subject already exists in this class");
+
+        const updatedClass = await Class.findOneAndUpdate({
+            _id: req.params.id,
+            schoolId: req.user.schoolId,
+        },
+            {
+                $push: {
+                    subjects: {
+                        name: subjectName,
+                        teacher: teacherId,
+                    }
+                }
+            },
+            { new: true },
+        );
+
+
+        return successResponse(res, 200, "Subjet added successfully", updatedClass);
+    } catch (error) {
+        console.log("error from classController.js - addSubjectToClass ", error.message);
+        return errorResponse(res, 500, error.message);
+    }
+};
+
+export const removeSubjectFromClass = async (req, res) => {
+    try {
+        if (!req.user.schoolId) {
+            return errorResponse(res, 403, "No school associated with your account");
+        }
+
+        const { subjectId } = req.params;
+
+        const classToUpdate = await Class.findOne({
+            _id: req.params.id,
+            schoolId: req.user.schoolId,
+        },
+        )
+        if (!classToUpdate) return errorResponse(res, 404, "Class not found");
+
+        const subjectExists = classToUpdate.subjects.some(
+            (s) => s._id.toString() === subjectId
+        );
+        if (!subjectExists) return errorResponse(res, 404, "Subject not found in this class");
+
+        const updatedClass = await Class.findOneAndUpdate(
+            { _id: req.params.id, schoolId: req.user.schoolId },
+            { $pull: { subjects: { _id: subjectId } } },
+            { new: true },
+        );
+
+        return successResponse(res, 200, "Subject removed successfully", updatedClass);
+
+    } catch (error) {
+        console.log("error from classController.js - removeSubjectToClass ", error.message);
         return errorResponse(res, 500, error.message);
     }
 }

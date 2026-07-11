@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
         //     type: String,
         //     default: null,
         // },
-        assignedClass: {
+        assignedClasses: {
             type: mongoose.Schema.Types.ObjectId,
             default: null,
         },

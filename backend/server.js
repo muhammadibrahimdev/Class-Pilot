@@ -28,7 +28,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/schools", schoolRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api", classRoutes);
+app.use("/api/classes", classRoutes);
 
 app.get('/', (req, res)=> {
     res.send("ClassPilot API is running!");
