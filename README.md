@@ -3,6 +3,13 @@
 > A multi-tenant School Management SaaS platform built with the MERN stack. Designed for real schools — manage admins, teachers, students, attendance, fees, and results from one unified hub.
 
 
+
+![ClassPilot Dashboard](https://i.ibb.co/FpHCzxm/Screenshot-2026-07-11-174046.png)
+
+
+![ClassPilot Dashboard](https://i.ibb.co/DhTg42r/Screenshot-2026-07-11-173947.png)
+
+
 ![ClassPilot Dashboard](https://i.ibb.co/HTF04CGC/Screenshot-2026-07-11-172816.png)
 
 ---
