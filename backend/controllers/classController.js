@@ -30,7 +30,7 @@ export const createClass = async (req, res) => {
             subjects: subjects || [],
         });
 
-        return successResponse(res, 200, "Class created successfully", newClass);
+        return successResponse(res, 201, "Class created successfully", newClass);
     } catch (error) {
         console.log("error from classController.js - createClass ", error.message);
         return errorResponse(res, 500, error.message);
@@ -120,7 +120,7 @@ export const updateClass = async (req, res) => {
 
         const classToUpdate = await Class.findOne({
             _id: req.params.id,
-            schoolId: req.user.schoolid,
+            schoolId: req.user.schoolId,
         })
 
         if (!classToUpdate) return errorResponse(res, 404, "Class not found");
@@ -162,7 +162,7 @@ export const addSubjectToClass = async (req, res) => {
             return errorResponse(res, 403, "No school associated with your account");
         }
 
-        const { subjectName, teacherId } = req.body;
+        const { name, teacherId } = req.body;
 
         const classToUpdate = await Class.findOne({
             _id: req.params.id,
@@ -171,7 +171,7 @@ export const addSubjectToClass = async (req, res) => {
         if (!classToUpdate) return errorResponse(res, 404, "Class not found");
 
         const subjectExists = classToUpdate.subjects.some(
-            (s) => s.name.toLowerCase() === subjectName.toLowerCase()
+            (s) => s.name.toLowerCase() === name.toLowerCase()
         );
         if (subjectExists) return errorResponse(res, 400, "Subject already exists in this class");
 
@@ -182,7 +182,7 @@ export const addSubjectToClass = async (req, res) => {
             {
                 $push: {
                     subjects: {
-                        name: subjectName,
+                        name: name,
                         teacher: teacherId,
                     }
                 }
@@ -228,6 +228,36 @@ export const removeSubjectFromClass = async (req, res) => {
 
     } catch (error) {
         console.log("error from classController.js - removeSubjectToClass ", error.message);
+        return errorResponse(res, 500, error.message);
+    }
+}
+
+
+export const deleteClass = async (req, res) => {
+    try {
+        if (!req.user.schoolId) {
+            return errorResponse(res, 403, "No school associated with your account");
+        }
+
+        const classExists = await Class.findOne({
+            _id: req.params.id,
+            schoolId: req.user.schoolId
+        });
+
+        if (!classExists) {
+            return errorResponse(res, 404, "Class not found");
+        }
+
+        if(classExists.totalStudents > 0){
+            return errorResponse(res, 403, "Class having students enrolled can't be deleted");
+        }
+
+        await classExists.deleteOne();
+
+        return successResponse(res, 200, "Class deleted successfully");
+
+    } catch (error) {
+        console.log("error from classController.js - deleteClass ", error.message);
         return errorResponse(res, 500, error.message);
     }
 }

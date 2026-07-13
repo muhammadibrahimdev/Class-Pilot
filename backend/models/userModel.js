@@ -36,18 +36,11 @@ const userSchema = new mongoose.Schema(
             enum: ["superadmin", "schooladmin", "teacher", "student", "parent"],
             default: "parent",
         },
-        // subjects: {
-        //     type: String,
-        //     default: null,
-        // },
-        assignedClasses: {
-            type: mongoose.Schema.Types.ObjectId,
+       
+        photo: {
+            type: String,
             default: null,
         },
-        // photo: {
-        //     type: String,
-        //     default: null,
-        // },
         isActive: {
             type: Boolean,
             default: true,

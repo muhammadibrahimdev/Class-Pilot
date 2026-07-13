@@ -1,5 +1,5 @@
 import express from 'express'
-import { addTeacher, deleteTeacher, editTeacher, getAllTeachers } from '../controllers/userController.js';
+import { addTeacher, deleteTeacher, editTeacher, getAllTeachers } from '../controllers/teacherController.js';
 import { authorize, protect } from '../middleware/authMiddleware.js';
 const router = express.Router();
 

@@ -6,7 +6,7 @@ import helmet from 'helmet'
 import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
-import userRoutes from './routes/userRoutes.js';
+import userRoutes from './routes/teacherRoutes.js';
 import classRoutes from './routes/classRoutes.js';
 import errorMiddleware from './middleware/errorMiddleware.js';
 
