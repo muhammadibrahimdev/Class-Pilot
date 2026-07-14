@@ -4,13 +4,12 @@ import { errorResponse, successResponse } from "../utils/apiResponse.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 import Teacher from "../models/teacherModel.js";
 
-const ALLOWED_SORT_KEYS = ['name', 'email', 'class', 'subject', 'createdAt']
+const ALLOWED_SORT_KEYS = ['name', 'email', 'phone', 'createdAt']
 
 export const addTeacher = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-
 
         if (!req.user.schoolId) {
             return errorResponse(res, 403, "No school associated with your account");

@@ -21,6 +21,7 @@ export const navByRole = {
   schooladmin: [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
     { label: 'Teachers', icon: UserRound, path: '/admin/teachers' },
+    { label: 'Students', icon: UserRound , path: '/teacher/students' },
     { label: 'Academic', icon: GraduationCap, path: '/admin/academic' },
     { label: 'Financial', icon: Wallet, path: '/admin/financial' },
     { label: 'Users', icon: Users, path: '/admin/users' },
@@ -30,6 +31,7 @@ export const navByRole = {
   teacher: [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/teacher/dashboard' },
     { label: 'Academic', icon: GraduationCap, path: '/teacher/academic' },
+    { label: 'Students', icon:UserRound , path: '/teacher/students' },
     { label: 'Attendance', icon: CalendarCheck, path: '/teacher/attendance' },
     { label: 'Results', icon: BarChart3, path: '/teacher/results' },
     { label: 'Settings', icon: Settings, path: '/teacher/settings' },
