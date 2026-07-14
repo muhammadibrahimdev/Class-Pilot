@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
 const teacherSchema = new mongoose.Schema(
     {
         userId: {
@@ -8,18 +7,20 @@ const teacherSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
-        schoolId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'School',
-            required: true,
-        },
         assignedClasses: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Class',
-                default: null,
             }
         ],
+        subjects: [{
+            type: String,
+            trim: true
+        }],
+        qualification: {
+            type: String,
+            default: null
+        },
         joiningDate: {
             type: Date,
             default: Date.now
