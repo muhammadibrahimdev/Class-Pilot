@@ -44,14 +44,16 @@ export const addStudent = async (req, res) => {
                 gender,
                 bloodGroup,
                 emergencyContact,
+                classId,
+                admissionDate,
             },
         ],
             { session }
         );
+
+        await session.commitTransaction();
+
         const populatedStudent = await student.populate("classId", "name grade section");
-
-        seassion.commitTransaction();
-
         return successResponse(res, 201, "New student created sucesfully", populatedStudent);
 
     } catch (error) {
@@ -61,6 +63,38 @@ export const addStudent = async (req, res) => {
         if (session) {
             session.endSession();
         }
+    }
+}
+
+export const getStudentById = async (req, res) => {
+    try {
+        if (!req.user.schoolId) {
+            return errorResponse(res, 403, "No school associated with your account");
+        }
+
+        const user = await User.findOne({
+            _id: req.params.id,
+            schoolId: req.user.schoolId,
+            role: "student",
+        }).lean();
+        if (!user) return errorResponse(res, 400, "User not found");
+
+        const student = await Student.findOne({
+            userId: user._id,
+            schoolId: req.user.schoolId,
+        })
+            .populate("classId", "className grade section")
+            .populate("parentId", "name email phone")
+            .lean();
+
+        return successResponse(res, 200, "Student fetched successfully", {
+            ...user,
+            studentProfile: student,
+        })
+
+    } catch (error) {
+        console.log("error from studentController.js - getStudentById ", error.message);
+        return errorResponse(res, 500, error.message);
     }
 }
 
@@ -78,30 +112,30 @@ export const getallStudents = async (req, res) => {
         const sortKey = ALLOWED_SORT_KEYS.includes(req.query.sortKey) ? req.query.sortKey : 'name';
 
         const query = {
-            schoolId: req.user.id,
+            schoolId: req.user.schoolId,
             role: 'student',
             ...(search && {
                 $or: [
-                    { name: { $regex: "search", $options: "insensitive" } },
-                    { email: { $regex: "search", $options: "insensitive" } },
-                    { phone: { $regex: "search", $options: "insensitive" } },
+                    { name: { $regex: search, $options: "i" } },
+                    { email: { $regex: search, $options: "i" } },
+                    { phone: { $regex: search, $options: "i" } },
                 ],
             }),
         };
 
-        const [users, total] = Promise.all([
-            await Student.find(query)
+        const [users, total] = await Promise.all([
+            User.find(query)
                 .sort({ [sortKey]: sortDir })
                 .limit(limit)
-                .skip(page - 1) * limit
+                .skip((page - 1) * limit)
                 .lean(),
-            await Student.countDocuments(query),
+            User.countDocuments(query),
         ]);
 
-      
+
         const userdIds = users.map((u) => u._id);
         const studentsProfiles = await Student.find({ userId: { $in: userdIds } })
-            .populate("assignedClasses", "name grade section")
+            .populate("classId", "className grade section")
             .lean();
 
         const studentProfileMap = {};
@@ -131,7 +165,7 @@ export const getallStudents = async (req, res) => {
 }
 
 
-export const editStudent = async (req, res) => {
+export const updateStudent = async (req, res) => {
     try {
 
         if (!req.user.schoolId) {
@@ -142,7 +176,7 @@ export const editStudent = async (req, res) => {
 
         const user = await User.findOne({
             _id: req.params.id,
-            schoolId: req.user._id,
+            schoolId: req.user.schoolId,
             role: 'student'
         });
 
@@ -154,7 +188,8 @@ export const editStudent = async (req, res) => {
         if (photo) user.photo = photo;
         if (email && email !== user.email) {
             const emailExist = await User.findOne({ email });
-            if (emailExist) return errorResponse(res, 400, "Email already in use")
+            if (emailExist) return errorResponse(res, 400, "Email already in use");
+            user.email = email;
         }
         await user.save();
 
@@ -169,25 +204,25 @@ export const editStudent = async (req, res) => {
             ...(parentId && { parentId }),
         }
 
-        const teacher = await Student.findOneAndUpdate(
+        const student = await Student.findOneAndUpdate(
             { userId: user._id },
             studentUpdated,
             { new: true },
-        ).populate("classId", "name grade section")
+        ).populate("classId", "className grade section")
 
-        successResponse(res, 200, "Student updated successfully", {
+        return successResponse(res, 200, "Student updated successfully", {
             user: {
                 _id: user.id,
-                name,
-                email,
-                phone,
-                photo,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                photo: user.photo,
             },
-            teacher,
+            student,
         });
 
     } catch (error) {
-        console.log("error from studentController.js - editStudent ", error.message);
+        console.log("error from studentController.js - updateStudent ", error.message);
         return errorResponse(res, 500, error.message);
 
     }
@@ -196,7 +231,7 @@ export const editStudent = async (req, res) => {
 
 export const deleteStudent = async (req, res) => {
     const session = await mongoose.startSession();
-    session.startTransaction();
+    await session.startTransaction();
 
     try {
         if (!req.user.schoolId) {
@@ -207,9 +242,8 @@ export const deleteStudent = async (req, res) => {
             _id: req.params.id,
             schoolId: req.user.schoolId,
             role: "student"
-        },
-            { session }
-        );
+        }).session(session);
+        
         if (!user) return errorResponse(res, 404, "Student not found");
 
         await User.findByIdAndDelete(user._id, { session });
