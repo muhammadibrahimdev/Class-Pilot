@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
 import userRoutes from './routes/teacherRoutes.js';
 import classRoutes from './routes/classRoutes.js';
+import attendanceRoutes from './routes/attendanceRoutes.js'
 import errorMiddleware from './middleware/errorMiddleware.js';
 
 // to resolve the recent error after node24 update, we need to set the dns servers explicitly in our code. This is because the default dns servers may not be compatible with the new node version. By setting the dns servers to known public dns servers like Cloudflare and Google, we can ensure that our application can resolve domain names correctly.
@@ -29,6 +30,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/schools", schoolRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/classes", classRoutes);
+app.use("api/attendance", attendanceRoutes);
 
 app.get('/', (req, res)=> {
     res.send("ClassPilot API is running!");
