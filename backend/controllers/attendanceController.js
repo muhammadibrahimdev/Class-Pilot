@@ -116,3 +116,39 @@ export const markAttendance = async (req, res) => {
         session.endSession();
     }
 };
+
+export const updateAttendance = async (req, res) => {
+    try {
+        if (req.user.schoolId) {
+            return errorResponse(res, 403, "No school associated with your account")
+        }
+        const { status, remarks } = req.body;
+
+        if (status && !['present', 'absent', 'leave', 'late'].includes(status)) {
+            return errorResponse(res, 400, "Invalid status");
+        };
+
+        const record = await Attendance.findOne({ _id: req.params.id, schoolId: req.user.schoolId });
+        if (!record) return errorResponse(res, 404, "Attendance record not found");
+
+        if (req.user.role === "teacher") {
+            const classDoc = await Class.findOne({ _id: record.classId, schoolId: req.user.schoolId });
+            if (!hasClassAccess(classDoc, req.user)) {
+                return errorResponse(res, 404, "You do not have access to this class");
+            }
+        }
+
+        if (status) record.status = status;
+        if (remarks !== undefiend) record.remarks = remarks;
+        record.markedBy = req.user._id;
+
+        await record.save();
+
+        return successResponse(res, 200, "Attendance updated succesfully", record);
+
+    } catch (error) {
+        await session.abortTransaction();
+        console.log("error from attendanceController.js - updateAttendance", error.message);
+        return errorResponse(res, 500, error.message);
+    }
+}
