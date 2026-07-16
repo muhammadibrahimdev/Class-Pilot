@@ -119,7 +119,7 @@ export const markAttendance = async (req, res) => {
 
 export const updateAttendance = async (req, res) => {
     try {
-        if (req.user.schoolId) {
+        if (!req.user.schoolId) {
             return errorResponse(res, 403, "No school associated with your account")
         }
         const { status, remarks } = req.body;
@@ -134,7 +134,7 @@ export const updateAttendance = async (req, res) => {
         if (req.user.role === "teacher") {
             const classDoc = await Class.findOne({ _id: record.classId, schoolId: req.user.schoolId });
             if (!hasClassAccess(classDoc, req.user)) {
-                return errorResponse(res, 404, "You do not have access to this class");
+                return errorResponse(res, 403, "You do not have access to this class");
             }
         }
 
@@ -149,6 +149,51 @@ export const updateAttendance = async (req, res) => {
     } catch (error) {
         await session.abortTransaction();
         console.log("error from attendanceController.js - updateAttendance", error.message);
+        return errorResponse(res, 500, error.message);
+    }
+}
+
+export const getClassAttendance = async (req, res) => {
+    try {
+        if (!req.user.schoolId) {
+            return errorResponse(res, 403, "No school associated with your account")
+        }
+
+        const { classId, date } = req.query;
+
+        if (!classId || !date) return errorResponse(res, 400, "classId and date are required");
+
+        const classDoc = await Class.findOne({ _id: classId, schoolId: req.user.schoolId });
+        if (!classDoc) return errorResponse(res, 404, "Class not found");
+
+        if (req.user.role === "teacher" && !hasClassAccess(classDoc, req.user)) {
+            return errorResponse(res, 403, "You do not have access to this class")
+        }
+
+        const normalizedDate = normalizeDate(date);
+
+        const records = await Attendance.find({
+            classId,
+            schoolId: req.user.schoolId,
+            date: normalizedDate
+        })
+            .populate({
+                path: 'studentId',
+                select: 'rollNumber userId',
+                populate: { path: 'userId', select: 'name photo' },
+            })
+            .lean();
+
+        return successResponse(res, 200, "Class attendance fetched successfully", {
+            classId,
+            date: normalizedDate,
+            marked: records.length > 0,
+            records,
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        console.log("error from attendanceController.js - getClassAttendance", error.message);
         return errorResponse(res, 500, error.message);
     }
 }
